@@ -6,8 +6,6 @@
 # Example of how to combine k2 with speechbrain pretrained encoder to decode well and fastly. 
 set -eou pipefail
 
-stage=1
-
 libri_dirs=(
 /root/fangjun/data/librispeech/LibriSpeech
 /export/corpora5/LibriSpeech
@@ -31,6 +29,7 @@ fi
 
 echo "LibriSpeech dataset dir: $libri_dir"
 
+stage=0
 
 if [ $stage -le 1 ]; then
   local/download_lm.sh "openslr.org/resources/11" data/local/lm
@@ -51,6 +50,7 @@ fi
 
 if [ $stage -le 3 ]; then
   # Build G
+  
   python3 -m kaldilm \
     --read-symbol-table="data/lang_nosp/words.txt" \
     --disambig-symbol='#0' \
@@ -68,6 +68,12 @@ if [ $stage -le 3 ]; then
     --disambig-symbol='#0' \
     --max-order=4 \
     data/local/lm/lm_fglarge.arpa >data/lang_nosp/G_4_gram.fst.txt
+  
+  python3 -m kaldilm \
+    --read-symbol-table="data/lang_nosp/words.txt" \
+    --disambig-symbol='#0' \
+    --max-order=6 \
+    data/local/lm/lm_fglarge.arpa >data/lang_nosp/G_6_gram.fst.txt
 
   echo ""
   echo "To load G:"
@@ -78,17 +84,11 @@ if [ $stage -le 3 ]; then
 fi
 
 if [ $stage -le 4 ]; then
-  echo "Start building HLG..."
   python3 ./build_HLG.py
-fi 
- 
-if [ $stage -le 5 ]; then
-  echo "Start converting G_4_gram.fst..."
   python3 ./convert_G_4_gram_fst.py
 fi
 
-if [ $stage -le 6 ]; then
-  echo "Start testing..."
-  python3 ./test_k2_HLG.py \
+if [ $stage -le 5 ]; then
+  python3 ./test_k2_HLG_with_lm_ori.py \
   --use-lm-score=True
 fi
