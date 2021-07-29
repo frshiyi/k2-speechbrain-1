@@ -1,5 +1,5 @@
 # k2-speechbrain
-In this repository, I try to combine k2 with speechbrain to decoding well and fastly.
+this repository, I try to combine k2 with speechbrain to decoding well and fastly.
 
 **Notice:**, I just did a preliminary explore about integrating k2 into speechbrain. And there is still a big space to improve it if anyone is interested in it.
 
